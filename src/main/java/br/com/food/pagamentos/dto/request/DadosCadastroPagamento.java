@@ -9,25 +9,21 @@ public record DadosCadastroPagamento(
         @NotNull
         @Positive
         BigDecimal valor,
-        @NotBlank
-        @Size(max = 100)
+        @NotBlank(message = "O nome não pode estar em branco e deve ter no máximo 100 caracteres.")
+        @Size(max = 100, message = "O nome deve ter no máximo 100 caracteres.")
         String nome,
-        @NotBlank
-        @Size(max = 9)
+        @NotBlank(message = "O número não pode estar em branco e deve ter exatamente 9 dígitos.")
+        @Size(max = 9, min = 9, message = "O número deve ter exatamente 9 dígitos.")
         String numero,
-        @NotBlank
-        @Size(max = 7)
+        @NotBlank(message = "A expiração não pode estar em branco e deve ter no máximo 7 caracteres.")
+        @Size(max = 7, message = "A expiração deve ter no máximo 7 caracteres.")
         String expiracao,
-        @NotBlank
-        @Size(min = 3, max = 3)
+        @NotBlank(message = "O código não pode estar em branco e deve ter exatamente 3 caracteres.")
+        @Size(min = 3, max = 3, message = "O código deve ter exatamente 3 caracteres.")
         String codigo,
-        @NotNull
-        @Pattern(regexp = "^(CRIADO|CONFIRMADO|CANCELADO)$")
-        Status status,
-        @NotNull
+        @NotNull(message = "O ID do pedido não pode ser nulo.")
         Long pedidoId,
-        @NotNull
+        @NotNull(message = "O ID da forma de pagamento não pode ser nulo.")
         Long formaDePagamentoId
-
-        ) {
+) {
 }

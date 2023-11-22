@@ -1,17 +1,14 @@
 package br.com.food.pagamentos.controller;
 
+import br.com.food.pagamentos.dto.request.DadosAtualizacaoPagamento;
 import br.com.food.pagamentos.dto.request.DadosCadastroPagamento;
-import br.com.food.pagamentos.dto.response.DadosDetalhamentoPagamento;
-import br.com.food.pagamentos.model.Pagamento;
-import br.com.food.pagamentos.repository.PagamentoRepository;
+import br.com.food.pagamentos.service.PagamentoService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
@@ -19,14 +16,38 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class PagamentoController {
 
     @Autowired
-    private PagamentoRepository pagamentoRepository;
+    private PagamentoService pagamentoService;
 
     @PostMapping
     @Transactional
-    public ResponseEntity cadastrar(@Valid @RequestBody DadosCadastroPagamento dados, UriComponentsBuilder uriComponentsBuilder){
-        var pagamento = new Pagamento(dados);
-        var uri = uriComponentsBuilder.path("pagamento/{id}").buildAndExpand(pagamento.getId()).toUri();
-        this.pagamentoRepository.save(pagamento);
-        return ResponseEntity.ok(new DadosDetalhamentoPagamento(pagamento));
+    public ResponseEntity cadastrar(@Valid @RequestBody DadosCadastroPagamento dados, UriComponentsBuilder uriComponentsBuilder) {
+        var pagamento = this.pagamentoService.criarPagamento(dados);
+        var uri = uriComponentsBuilder.path("pagamento/{id}").buildAndExpand(pagamento.id()).toUri();
+        return ResponseEntity.created(uri).body(pagamento);
+    }
+
+    @GetMapping
+    public ResponseEntity listar(Pageable paginacao) {
+        var page = this.pagamentoService.listarTodosPagamentos(paginacao);
+        return ResponseEntity.ok(page);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity detalharPagamento(@PathVariable Long id) {
+        var pagamento = this.pagamentoService.listarPagamentoId(id);
+        return ResponseEntity.ok(pagamento);
+    }
+
+    @PutMapping
+    @Transactional
+    public ResponseEntity atualizar(@RequestBody @Valid DadosAtualizacaoPagamento dados) {
+        var pagamento = this.pagamentoService.atualizarPagamento(dados);
+        return ResponseEntity.ok(pagamento);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity deletar(@PathVariable Long id) {
+        this.pagamentoService.deletar(id);
+        return ResponseEntity.noContent().build();
     }
 }
